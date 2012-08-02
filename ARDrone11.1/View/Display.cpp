@@ -1,0 +1,270 @@
+#include "Display.h"
+
+Display::Display(SDL_Surface* s){
+
+	surface = s;
+
+	detection=false;
+	next = false;
+	previous = false;
+
+	hScale=0.9;
+	vScale=0.9;
+	lineWidth=2;
+	cvInitFont(&font,CV_FONT_HERSHEY_COMPLEX, hScale,vScale,0,lineWidth);
+
+	num=0;
+	numberObject = 0;
+}
+
+void Display::init(){
+
+	quit = false;
+
+	sdlRect.x = 0;
+	sdlRect.y = 0;
+	sdlRect.w = 320;
+	sdlRect.h = 240;
+
+	imageCamera = cvCreateImage( cvSize(250, 250 ), IPL_DEPTH_8U, 3 );
+
+	SDL_EnableKeyRepeat(0,0);
+	SDL_EnableUNICODE(1);
+	SDL_WM_SetCaption("Window",NULL);
+	SDL_ShowCursor(SDL_DISABLE);
+
+	imageManualMode = SDL_LoadBMP("./Background/bgManualMode.bmp");
+	imageTrackingMode = SDL_LoadBMP("./Background/bgTrackingMode.bmp");
+
+	image = imageManualMode;
+	SDL_BlitSurface(image, NULL, surface, &sdlRect);
+	SDL_Flip(surface);
+	
+}
+
+void Display::video(bool lock,int numObject){
+	
+	CvPoint centerImage = { 88, 72 };
+
+	if(detection){
+		if(!lock){	
+			if(next){
+				next = false;
+			
+				if(num>numberObject)
+					num=numberObject;
+				else if(num==numberObject)
+					num = 0;
+				else num++;
+			}
+			else if(previous){
+				previous = false;
+				
+				if(num>numberObject)
+					num=numberObject;
+				else if(num==0)
+					num = numberObject;
+				else num--;
+			}else if(num>numberObject)
+				num=numberObject;
+		}
+		else{ 
+			num = numObject;
+			cvCircle(imageCamera,centerImage,20,CV_RGB(0,128,0),0,1,8);
+		}
+	
+
+		for(int j(0); j<rect.size(); ++j){ 
+
+			CvPoint pt1 = { rect[j].x, rect[j].y };
+			CvPoint pt2 = { rect[j].x + rect[j].width, rect[j].y + rect[j].height };
+	
+			if(num==j){
+				
+				CvPoint centerObject = { rect[j].x + rect[j].width/2, rect[j].y + rect[j].height/2 };
+				float f3 = sqrt( pow(rect[j].x + rect[j].width/2 - 88,2) + pow(rect[j].y + rect[j].height/2 - 72,2) );
+
+				if(f3<20)  
+					cvRectangle(imageCamera, pt1, pt2, CV_RGB(0,255,0), 1, 1, 0);
+				else 	cvRectangle(imageCamera, pt1, pt2, CV_RGB(255,0,0), 1, 1, 0);
+
+				cvLine(imageCamera,centerObject,centerImage,CV_RGB(123,45,78),1,8,false);
+				
+			}
+			else cvRectangle(imageCamera, pt1, pt2, CV_RGB(255,255,255), 1, 1, 0);
+		}
+	}
+	
+	cvShowImage("Video", imageCamera);
+}
+
+void Display::saveFrame(const char* filename){
+
+	cvSaveImage(filename,imageCamera);
+
+}
+
+void Display::navData(){
+
+	char s[255];
+
+	imageNavData = cvLoadImage("./Background/bgNavData.png");
+	sprintf(s, "%i", levelBattery);
+	cvPutText (imageNavData,s,cvPoint(POS_X_LEVEL_BATTERY,POS_Y_LEVEL_BATTERY), &font, cvScalar(255,255,255));
+
+	sprintf(s, "%5i", altitude);
+	cvPutText (imageNavData,s,cvPoint(POS_X_ALTITUDE,POS_Y_ALTITUDE), &font, cvScalar(255,255,255));
+
+	sprintf(s, "%2.2f", vx);
+	cvPutText (imageNavData,s,cvPoint(POS_X_VX,POS_Y_VX), &font, cvScalar(255,255,255));
+
+	sprintf(s, "%2.2f", vy);
+	cvPutText (imageNavData,s,cvPoint(POS_X_VY,POS_Y_VY), &font, cvScalar(255,255,255));
+
+	sprintf(s, "%2.2f", psi);
+	cvPutText (imageNavData,s,cvPoint(POS_X_PSI,POS_Y_PSI), &font, cvScalar(255,255,255));
+
+	sprintf(s, "%2.2f", phi);
+	cvPutText (imageNavData,s,cvPoint(POS_X_PHI,POS_Y_PHI), &font, cvScalar(255,255,255));
+
+	sprintf(s, "%2.2f", theta);
+	cvPutText (imageNavData,s,cvPoint(POS_X_THETA,POS_Y_THETA), &font, cvScalar(255,255,255));
+
+	cvShowImage("Navigation Data", imageNavData);
+}
+
+void Display::manualMode(){
+	image = imageManualMode;
+}
+
+void Display::trackingMode(){
+	image = imageTrackingMode;
+}
+
+void Display::parameters(){
+
+	char s[255];
+	imageParameters = cvLoadImage("./Background/bgParameter.png");
+
+
+	sprintf(s, "%i", verticalSpeed);
+	cvPutText (imageParameters,s,cvPoint(POS_X_VERTICAL_SPEED,POS_Y_VERTICAL_SPEED), &font,cvScalar(
+									255*(1+7*(configuration==0)*(detection==false))/8,
+									255*(1+7*(configuration==0)*(detection==false))/8,
+                                                                       	255*(1+7*(configuration==0)*(detection==false))/8));
+
+	sprintf(s, "%i", angularSpeed);
+	cvPutText (imageParameters,s,cvPoint(POS_X_ANGULAR_SPEED,POS_Y_ANGULAR_SPEED), &font, cvScalar(
+									255*(1+7*(configuration==1)*(detection==false))/8,
+								 	255*(1+7*(configuration==1)*(detection==false))/8,
+								       	255*(1+7*(configuration==1)*(detection==false))/8));
+
+	sprintf(s, "%i", leftRightTilt);
+	cvPutText (imageParameters,s,cvPoint(POS_X_LEFT_RIGHT_TILT,POS_Y_LEFT_RIGHT_TILT), &font, cvScalar(
+									255*(1+7*(configuration==2)*(detection==false))/8,
+								       	255*(1+7*(configuration==2)*(detection==false))/8,
+								       	255*(1+7*(configuration==2)*(detection==false))/8));
+
+	sprintf(s, "%i", frontBackTilt);
+	cvPutText (imageParameters,s,cvPoint(POS_X_FRONT_BACK_TILT,POS_Y_FRONT_BACK_TILT), &font, cvScalar(
+									255*(1+7*(configuration==3)*(detection==false))/8,
+								       	255*(1+7*(configuration==3)*(detection==false))/8,
+								       	255*(1+7*(configuration==3)*(detection==false))/8));
+
+	if(record)
+		sprintf(s, "[ON]");
+	else	sprintf(s, "[OFF]");
+	
+	cvPutText (imageParameters,s,cvPoint(POS_X_RECORD_SPEED,POS_Y_RECORD_SPEED), &font, cvScalar(255,255,255));
+
+	if(tracking)
+		sprintf(s, "[ON]");
+	else	sprintf(s, "[OFF]");
+	
+	cvPutText (imageParameters,s,cvPoint(POS_X_TRACKING,POS_Y_TRACKING), &font, cvScalar(255,255,255));
+
+	cvShowImage("Parameters", imageParameters);
+
+}
+
+void Display::mainWindow(){
+	SDL_BlitSurface(image, NULL, surface, &sdlRect);
+	SDL_Flip(surface);
+
+}
+
+void Display::nextPerson(){
+
+	next = true;
+}
+
+void Display::previousPerson(){
+
+	previous = true;
+}
+
+void Display::setImage(IplImage* imageCamera){
+
+	this->imageCamera = cvCloneImage(imageCamera);
+}
+
+void Display::setRect(std::vector<cv::Rect> pFaceRectSeq){
+
+	rect = pFaceRectSeq;
+}
+
+void Display::setNavData(int levelBattery,int altitude,float psi, float phi, float theta, float vx, float vy){
+
+	this->levelBattery = levelBattery;
+	this->altitude = altitude;
+	this->psi = psi;
+	this->phi = phi;
+	this->theta = theta;
+	this->vx = vx;
+	this->vy = vy;
+}
+
+void Display::setParameters(int verticalSpeed,int angularSpeed,int leftRightTilt, int frontBackTilt, int configuration, bool record, bool tracking){
+
+	this->verticalSpeed = verticalSpeed;
+	this->angularSpeed = angularSpeed;
+	this->configuration = configuration;
+	this->leftRightTilt = leftRightTilt;
+	this->phi = phi;
+	this->frontBackTilt = frontBackTilt;
+	this->record = record;
+	this->tracking = tracking;
+
+}
+
+void Display::detectionOn(){
+	detection=true;
+}
+
+void Display::detectionOff(){
+	detection=false;
+}
+
+void Display::nextObject(){
+	num++;
+}
+
+void Display::previousObject(){
+	num--;
+}
+
+bool Display::isDetection(){
+	return detection;
+}
+
+int Display::getObjectNumber(){
+	return num;
+}
+
+bool Display::getQuit(){
+	return quit;
+}
+
+void Display::shutDown(){
+	quit=true;
+}

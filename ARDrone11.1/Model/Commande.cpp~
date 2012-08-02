@@ -1,0 +1,218 @@
+#include "Commande.h"
+
+Commande::Commande()
+{
+	seq = 1;
+	onGround = 1;
+	altitude=0;
+	pitch=0;
+	yaw=0;
+	roll=0;
+	connected=false;
+	
+	quit=false;
+	priorityCommand = false;
+
+	mutexArg = SDL_CreateMutex();
+}
+
+
+void Commande::mutexP(){
+
+	SDL_mutexP(mutexArg);
+
+}
+
+
+void Commande::mutexV(){
+
+	SDL_mutexV(mutexArg);
+
+}
+
+/*void Commande::setKey(bool val,int i){
+
+	key[i] = val;
+
+}*/
+
+void Commande::destroyMutex(){
+
+	SDL_DestroyMutex(mutexArg);
+
+}
+
+/*bool Commande::getKey(int i){
+
+	return key[i];
+
+}*/
+
+
+
+void Commande::emergency(){
+
+	sprintf(msg, "AT*REF=%i,290717952\r", seq);
+	communication->sendMessage(msg);
+	seq++;
+	onGround = true;
+
+}
+
+void Commande::land(){
+
+	sprintf(msg, "AT*REF=%i,290717696\r", seq);
+	communication->sendMessage(msg);
+	seq++;
+	onGround = true;
+
+}
+
+void Commande::takeOff(){
+
+	sprintf(msg, "AT*CONFIG=%d,\"general:navdata_demo\",\"TRUE\"\r", seq);
+        seq++;
+        communication->sendMessage(msg);
+	SDL_Delay(DELAY_COMMAND);
+
+        sprintf(msg, "AT*CTRL=0\r");
+        //seq++;
+        communication->sendMessage(msg);
+        SDL_Delay(DELAY_COMMAND);
+	
+	/*sprintf(msg, "AT*CONFIG=%d,\"general:navdata_demo\",\"TRUE\"\r", seq);
+        seq++;
+        communication->sendMessage(msg);
+	SDL_Delay(DELAY_COMMAND);
+		
+        sprintf(msg, "AT*CTRL=0\r");
+        communication->sendMessage(msg);
+        SDL_Delay(DELAY_COMMAND);*/
+		
+	//sprintf(msg, "AT*PMODE=%i,2\rAT*MISC=%i,2,20,2000,3000\rAT*FTRIM=%i\r", seq, seq + 1, seq + 2);
+	//communication->sendMessage(msg);
+	//seq += 3;
+	sprintf(msg, "AT*FTRIM=%i\r", seq);
+	communication->sendMessage(msg);
+	seq ++;
+	SDL_Delay(DELAY_COMMAND);
+	sprintf(msg, "AT*REF=%i,290718208\r", seq);
+	communication->sendMessage(msg);
+	seq++;
+	onGround = false;
+
+}
+
+void Commande::changeCam(int cam){
+
+	sprintf(msg, "AT*CONFIG=%i,\"video:video_channel\",\"%i\"\r", seq, cam);
+	//cam++;
+	//cam%=4;
+	communication->sendMessage(msg);
+	seq++;
+
+
+}
+
+void Commande::watchdog(){
+
+	sprintf(msg, "AT*COMWDG=%d\r", seq);
+	communication->sendMessage(msg);
+	seq++;
+
+}
+//page 31
+void Commande::movement(){
+
+	//printf("MOUVEMENT\n");
+	//system("clear");
+	//printf("%d %f  %f  %f  %f\n",seq,pitch,roll,altitude,yaw);
+
+	if( pitch || roll || altitude || yaw )
+		sprintf(msg, "AT*PCMD=%d,1,%d,%d,%d,%d\r", seq, *(int*)(&pitch), *(int*)(&roll), *(int*)(&altitude), *(int*)(&yaw));
+	else
+		sprintf(msg, "AT*PCMD=%d,0,%d,%d,%d,%d\r", seq, *(int*)(&pitch), *(int*)(&roll), *(int*)(&altitude), *(int*)(&yaw));
+
+	communication->sendMessage(msg);
+	seq++;
+}
+
+
+
+
+
+
+void Commande::initializationCommunication(){
+
+	communication = new Communication(AT_PORT);
+	communication->init();
+
+	connected = true;
+
+}
+
+void Commande::initializationDrone()
+{
+	sprintf(msg, "AT*CONFIG=%d,\"general:navdata_demo\",\"TRUE\"\r", seq);
+	seq++;
+	communication->sendMessage(msg);
+	SDL_Delay(DELAY_COMMAND);
+
+	//sprintf(msg, "AT*CTRL=0\r");
+	//connection->sendMessage(msg);
+	//SDL_Delay(DELAY_COMMAND);
+
+	sprintf(msg, "AT*CONFIG=1,\"video:video_channel\",\"0\"\r");
+	communication->sendMessage(msg);
+	SDL_Delay(DELAY_COMMAND);
+
+	sprintf(msg, "AT*CONFIG=%d,\"control:altitude_max\",\"%d\"\r", seq, 10000);//set max alt @ 2.5m
+	seq ++; 
+	communication->sendMessage(msg);
+	SDL_Delay(DELAY_COMMAND);
+
+	// Set max angle
+	/*sprintf(msg, "AT*CONFIG=%d,\"control:euler_angle_max\",\"%f\"\r", seq, 0.52f);// set max rotation velocity
+	seq++;
+	connection->sendMessage(msg);
+	SDL_Delay(DELAY_COMMAND);*/
+
+
+
+}
+
+bool Commande::isConnected(){return connected;}
+
+bool Commande::isOnGround(){return onGround;}
+
+float Commande::getAltitude(){return altitude;}
+float Commande::getPitch(){return pitch;}
+float Commande::getYaw(){return yaw;}
+float Commande::getRoll(){return roll;}
+
+int Commande::getSeq(){return seq;}
+bool Commande::isPriorityCommand(){return priorityCommand;}
+
+//Connection* Commande::getConnection(){return connection;}
+
+void Commande::setOnGround(bool onGround){this->onGround=onGround;}
+void Commande::setAltitude(float altitude){this->altitude=altitude;}
+void Commande::setPitch(float pitch){this->pitch=pitch;}
+void Commande::setYaw(float yaw){this->yaw=yaw;}
+void Commande::setRoll(float roll){this->roll=roll;}
+
+void Commande::setPriorityCommand(bool priorityCommand){this->priorityCommand=priorityCommand;}
+
+
+void Commande::disconnection(){
+
+	connection->closeSocket();
+
+}
+
+bool Commande::getQuit(){return quit;}
+
+void Commande::shutDown(){
+	quit=true;
+}
+

@@ -1,0 +1,56 @@
+#ifndef HEADER_IMAGE
+#define HEADER_IMAGE
+
+//#include "Video.h"
+
+
+#define FRONTCAMERA 1
+#define BOTTOMCAMERA 2
+
+#include <SDL/SDL.h>
+#include <opencv/cv.h>
+#include <opencv/highgui.h>
+
+
+typedef struct matrice_rgb
+{
+	int r;
+	int g;
+	int b;
+
+}Matrice_rgb;
+
+class Image
+{
+	public:
+
+	Image();
+
+	void matriceToSurface(int type);
+	void matriceToIplImage(int type);
+
+	void saveImage(const char* filename,int type,bool color);
+
+	void setMatriceImage(Matrice_rgb mat[240][320],int type);
+	//void setMatriceImage(int pixel,int y,int x);
+
+
+	IplImage* getIplImage(int type);
+	SDL_Surface* getSdlSurfaceImage(int type);
+	
+
+	private:
+	
+	IplImage* iplFrontImage;
+	IplImage* iplBottomImage;
+	SDL_Surface* sdlSurfaceFrontImage;
+	SDL_Surface* sdlSurfaceBottomImage;
+	Matrice_rgb matriceFrontImage[240][320];
+	Matrice_rgb matriceBottomImage[144][176];
+
+
+};
+
+
+#endif
+

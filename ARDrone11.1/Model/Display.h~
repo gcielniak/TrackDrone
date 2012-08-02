@@ -1,0 +1,26 @@
+#ifndef HEADER_DISPLAY
+#define HEADER_DISPLAY
+
+#include <SDL/SDL.h>
+
+class Display
+{
+	public:
+
+	Display();
+
+	void init();
+	void blipSurface(SDL_Surface* image);
+	void flip();
+
+	private:
+	
+	SDL_Surface* ecran;
+	SDL_Rect rect;
+
+};
+
+
+#endif
+
+

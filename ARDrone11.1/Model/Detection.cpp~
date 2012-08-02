@@ -1,0 +1,176 @@
+#include "Detection.h"
+
+Detection::Detection(){
+
+
+	//pCascade = 0;  // the face detector
+	//pStorage = 0; 
+
+
+	//mutexImage= SDL_CreateMutex();
+	//mutexRec= SDL_CreateMutex();
+
+	//image = cvCreateImage( cvSize(480, 144 ), IPL_DEPTH_8U, 3 );
+	//image = cvCreateImage( cvSize(320, 240 ), IPL_DEPTH_8U, 3 );
+
+	//image = cvLoadImage("../../Desktop/image01866_03922.png");
+
+
+	//CvSeq * pFaceRectSeq; 
+	quit = false;
+	detect = false;
+
+	//pCascade = (CvHaarClassifierCascade *)cvLoad(("../../Tools/OpenCV-2.4.0-beta2/data/haarcascades/haarcascade_frontalface_default.xml"),0, 0, 0 );
+	//IplImage * im = cvCreateImage( cvSize(240, 240 ), IPL_DEPTH_8U, 1 );
+	//IplImage * im2 = cvCreateImage( cvSize(240, 240 ), IPL_DEPTH_8U, 1 );
+	//cvErode(im,im2,NULL,1);
+	//printf("passage\n");
+	//pStorage = cvCreateMemStorage(0);
+	//cvClearMemStorage(pStorage);
+
+	c = new cv::CascadeClassifier();
+	//c->load("./XML/cascade4.xml");
+	//c->load("./XML/cascade.xml");
+	//c->load("./XML/trainCascadeStg14.xml");
+	//c->load("./XML/trainCascadestg10-50.xml");
+	
+	c->load("./XML/newCascade2.xml");
+	//c->load("./XML/cascade7.xml");
+	/*const char * stl = "./XML/TrainingSample.xml";
+	bool flag = c->load(stl);
+	if(flag)printf("true load\n");
+	else printf("false load\n");
+*/
+	/*const char* classifierdir;
+	classifierdir = "./XML/cascade.xml";
+	pCascade  = 0;
+	pCascade = cvLoadHaarClassifierCascade(classifierdir,cvSize(24,24));
+	const char* cascade_name;
+	cascade_name = "cascade.xml";
+	cvSave(cascade_name,pCascade);
+		printf("passage2\n");
+	cvReleaseHaarClassifierCascade(&pCascade);
+	pCascade2  = 0;
+	pCascade = (CvHaarClassifierCascade *)cvLoad(cascade_name,0, 0, 0 );*/
+
+
+	//pCascade = (CvHaarClassifierCascade *)cvLoad(("./XML/TrainingSample.xml"),0, 0, 0 );
+	//pCascade = (CvHaarClassifierCascade *)cvLoad(("./XML/cascade.xml"));
+	//bool flag = CvCascadeClassifier::load("./XML/cascade.xml");
+	//pCascade = CascadeClassifier::load(("./XML/cascade.xml"));
+	
+	
+	//pCascade = (CvHaarClassifierCascade *)cvLoad(("./XML/haarcascade_frontalface_default.xml"),0, 0, 0 );
+	//pCascade = (CvHaarClassifierCascade *)cvLoad(("./XML/haarcascade_eye.xml"),0, 0, 0 );
+
+
+
+	/*if(!pStorage || !pCascade )
+		{
+		printf("Initialization failed: %s\n",
+			(!pCascade)? "can't load haar-cascade -- "
+				         "make sure path is correct" :
+			"unable to allocate memory for data storage");
+		exit(-1);
+		}*/
+
+	//image = cvCreateImage( cvSize(320, 240 ), IPL_DEPTH_8U, 3 );
+	
+}
+
+void Detection::detectPeople(){
+int i=0;
+
+
+		c->detectMultiScale(image,r,1.1,3,1,cvSize(40,40),cvSize(70,70));
+
+		//mutexP(2);
+		
+		//printf("CHQINE -> %s\n",chaine2);
+		//IplImage* image2 = cvCreateImage( cvSize(176, 144 ), IPL_DEPTH_8U, 1 );
+		//image2 = cvLoadImage("chaine2");
+		//cvShowImage("try", image2);
+		
+		// detect faces in image
+		/*pFaceRectSeq = cvHaarDetectObjects
+		(image, pCascade, pStorage,
+		1.1,                       // increase search scale by 10% each pass
+		3,                         // merge groups of three detections
+		CV_HAAR_DO_CANNY_PRUNING,  // skip regions unlikely to contain a face
+		cvSize(20,20));            // smallest size face to detect = 40x40
+*/
+		//mutexV(2);
+
+
+	//	cvReleaseImage(&image);
+		//cvReleaseHaarClassifierCascade(&pCascade);
+	//	cvReleaseMemStorage(&pStorage);
+
+
+	/*		if(detect){
+
+		CvRect* r = (CvRect*)cvGetSeqElem(pFaceRectSeq, i);
+	
+		for(i=0;i<(pFaceRectSeq? pFaceRectSeq->total:0); i++ )
+		{
+			r = (CvRect*)cvGetSeqElem(pFaceRectSeq, i);
+
+				CvPoint pt1 = { r->x, r->y };
+				CvPoint pt2 = { r->x + r->width, r->y + r->height };
+				cvRectangle(image, pt1, pt2, CV_RGB(0,255,0), 2, 4, 0);
+		}
+
+		}*/
+
+		//printf("IIIIIIIIIII %d\n",i);
+		
+}
+
+std::vector<cv::Rect> Detection::getRect(){
+
+	return r;
+
+}
+
+void Detection::setImage(IplImage* image){
+
+	this->image = image;
+
+}
+
+
+/*void Detection::mutexP(int num){
+
+	if(num==1)
+		SDL_mutexP(mutexImage);
+	else	SDL_mutexP(mutexRec);
+}
+
+
+void Detection::mutexV(int num){
+
+	if(num==1)
+		SDL_mutexV(mutexImage);
+	else	SDL_mutexV(mutexRec);
+
+}
+
+void Detection::destroyMutex(){
+
+	SDL_DestroyMutex(mutexImage);
+	SDL_DestroyMutex(mutexRec);
+}*/
+
+bool Detection::getQuit(){return quit;}
+
+void Detection::on(){detect=true;}
+void Detection::off(){detect=false;}
+bool Detection::isOn(){return detect;}
+
+void Detection::shutDown(){
+	
+	//if(pCascade) cvReleaseHaarClassifierCascade(&pCascade);
+	//	if(pStorage) cvReleaseMemStorage(&pStorage);
+
+	quit=true;
+}

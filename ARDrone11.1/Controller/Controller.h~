@@ -1,0 +1,153 @@
+#ifndef HEADER_CONTROLLER
+#define HEADER_CONTROLLER
+
+#include "../Model/ArDrone.h"
+#include "../View/EventKeyboard.h"
+#include "../View/Display.h"
+
+#include <time.h>
+
+#define MAX_VERTICAL_SPEED	90
+#define MIN_VERTICAL_SPEED	40
+
+#define MAX_ANGULAR_SPEED	90
+#define MIN_ANGULAR_SPEED	40
+
+#define MAX_LEFT_RIGHT_TILT	90
+#define MIN_LEFT_RIGHT_TILT	5
+
+#define MAX_FRONT_BACK_TILT	90
+#define MIN_FRONT_BACK_TILT	5
+
+#define HORIZONTAL_CAM		0
+#define VERTICAL_CAM		1
+#define LARGE_HORIZONTAL_CAM 	2
+#define LARGE_VERTICAL_CAM	3
+
+#define MENU			0
+#define UAV_CONTROL		1
+#define EVALUATE_CLASSIFIER	2
+#define CREATE_LIST		3
+
+class Controller
+{
+	public:
+
+	Controller();
+
+	void run();
+	void updateKey();
+	void sendArg();
+
+	void exit();
+
+
+	void updateNavData();
+	void buttonLockOrSwitchConfiguration();
+	void updateConfiguration();
+	
+	void updateFrame();
+
+
+	void decreaseParameter();
+	void increaseParameter();
+
+	void startStopRecord();
+
+	
+	void aButton();
+	void yButton();
+	void xButton();
+	void rightBumper();
+	void rightTrigger();
+	void leftTrigger();
+	void startButton();
+	void backButton();
+
+	void landing();
+	void takeOff();
+
+	void manualMode2trackingMode();
+	void trackingMode2manualMode();
+
+	void changeCam(int type);
+	void directionnalPadLeft();
+	void directionnalPadDown();
+	void directionnalPadRight();
+	void directionnalPadUp();
+
+
+	void rightStickLeft();
+	void rightStickRight();
+	void rightStickDown();
+	void rightStickUp();
+	void leftStickLeft();
+	void leftStickRight();
+	void leftStickDown();
+	void leftStickUp();
+	
+	void changeParameter();
+	void recordImage();
+
+	private:
+
+	SDL_Thread* threadEK;
+
+	EventKeyboard *eventKeyboard;
+	Display *display;
+	ArDrone *arDrone;
+
+	IplImage* iplFrontImage;
+	IplImage* iplBottomImage;
+	IplImage* iplGreyFrontImage;
+	IplImage* iplGreyBottomImage;
+
+	cv::CascadeClassifier *classifier;
+
+	bool key[23];
+	bool pressed[23];
+	bool quit;
+	bool record;
+
+	bool priorityCommand;
+
+	int imageNumber;
+	int cam;
+	int objectNumber;
+
+	char folderRecord[1024];
+	char folderRecord2[1024];
+	char unixCommand[1024];
+	char nameImage[1024];
+	char nameImage2[1024];
+	
+	bool manualMode;
+	bool trackingMode;
+	bool tracking;
+
+	int configuration;
+
+	int levelBattery;
+	int altitude;
+	float psi;
+	float phi;
+	float theta;
+	float vx;
+	float vy;
+
+	int verticalSpeedPercentage;
+	int angularSpeedPercentage;
+	int leftRightTiltPercentage;
+	int frontBackTiltPercentage;
+
+	float verticalSpeed;
+	float angularSpeed;
+	float leftRightTilt;
+	float frontBackTilt;
+
+	bool redisplayParameters;
+
+};
+
+
+#endif

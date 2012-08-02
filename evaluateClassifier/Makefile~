@@ -1,0 +1,10 @@
+CXX=g++
+CCFLAGS = `pkg-config --cflags opencv` `pkg-config --libs opencv`
+
+OBJ = evaluateDetection.cpp
+
+all:
+	$(CC) $(OBJ) -o evaluateDetection $(CCFLAGS)
+
+clean:
+	rm -rf *.o

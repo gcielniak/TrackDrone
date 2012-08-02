@@ -1,0 +1,101 @@
+#ifndef HEADER_COMMAND
+#define HEADER_COMMAND
+
+
+#include <SDL/SDL.h>
+
+#define SIZE_MSG		1024
+#define DELAY_COMMAND		30
+
+#include "Communication.h"
+
+int threadCommand(void *data);
+int threadWatchdog(void *data);
+
+class Command
+{
+	public:
+
+	Command();
+
+	void turnOnUpdateEvent();
+	void emergency();
+	void land();
+	void takeOff();
+	void movement();
+	void watchdog();
+	void initializationCommunication();
+	void disconnection();
+	void initializationDrone();
+	
+	bool isOnGround();
+
+
+	/*Accessor*/
+	float getAltitude();
+	float getPitch();
+	float getYaw();
+	float getRoll();
+
+	char* getMsg();
+	int getSeq();
+	
+	//EventKeyboard * getEventKeyboard();
+	//Connection* getConnection();
+
+
+	void setAltitude(float altitude);
+	void setPitch(float pitch);
+	void setYaw(float yaw);
+	void setRoll(float roll);
+	void setMsg(char* msg);
+	void setOnGround(bool onGround);
+	void setPriorityCommand(bool priorityCommand);
+
+	void mutexP();
+	void mutexV();
+	void destroyMutex();
+	void setKey(bool val,int i);
+	bool getKey(int i);
+
+	
+	bool isPriorityCommand();
+
+	void changeCam(int cam);
+	
+	bool isConnected();
+
+	bool getQuit();
+	void shutDown();
+
+
+
+	private:
+	bool quit;
+	bool connected;
+
+
+	bool priorityCommand;
+	
+	
+	SDL_mutex* mutexArg;
+	Communication *communication;
+	
+
+	unsigned int seq;	// Current sequence number
+
+
+	float altitude;
+	float pitch;
+	float yaw;
+	float roll;
+	bool onGround;	
+	char msg[SIZE_MSG];
+
+	
+
+
+};
+
+
+#endif

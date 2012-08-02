@@ -1,0 +1,8 @@
+#include "Commande.h"
+#include "Video.h"
+
+
+
+int threadCommande(void* data);
+
+int threadVideo(void* data);

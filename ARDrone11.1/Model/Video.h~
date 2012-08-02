@@ -1,0 +1,170 @@
+#ifndef HEADER_VIDEO
+#define HEADER_VIDEO
+
+#include <SDL/SDL.h>
+
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+
+#include "Communication.h"
+
+#include <opencv/cv.h>
+#include <opencv/highgui.h>
+
+#define FRONTCAMERA 1
+#define BOTTOMCAMERA 2
+
+
+#define TIMER			200000
+#define LENGTH_GRAPHIQUE 	640
+#define HEIGHT_GRAPHIQUE	480
+
+#define TAILLE_MAX_VIDEO	20000
+
+#define NB_GOB_MAX		15
+#define NB_MCBLOCK_MAX		20
+#define NB_BLOCK		6
+
+#define INT32       int
+#define DCTELEM     int
+#define DCTSIZE     8
+#define DCTSIZE2    64
+#define CONST_BITS  13
+#define PASS1_BITS  1
+#define ONE	((INT32) 1)
+#define MULTIPLY(var,const)  ((var) * (const))
+#define DESCALE(x,n)  RIGHT_SHIFT((x) + (ONE << ((n)-1)), n)
+#define RIGHT_SHIFT(x,shft)	((x) >> (shft))
+
+#define FIX_0_298631336  ((INT32)  2446)	/* FIX(0.298631336) */
+#define FIX_0_390180644  ((INT32)  3196)	/* FIX(0.390180644) */
+#define FIX_0_541196100  ((INT32)  4433)	/* FIX(0.541196100) */
+#define FIX_0_765366865  ((INT32)  6270)	/* FIX(0.765366865) */
+#define FIX_0_899976223  ((INT32)  7373)	/* FIX(0.899976223) */
+#define FIX_1_175875602  ((INT32)  9633)	/* FIX(1.175875602) */
+#define FIX_1_501321110  ((INT32)  12299)	/* FIX(1.501321110) */
+#define FIX_1_847759065  ((INT32)  15137)	/* FIX(1.847759065) */
+#define FIX_1_961570560  ((INT32)  16069)	/* FIX(1.961570560) */
+#define FIX_2_053119869  ((INT32)  16819)	/* FIX(2.053119869) */
+#define FIX_2_562915447  ((INT32)  20995)	/* FIX(2.562915447) */
+#define FIX_3_072711026  ((INT32)  25172)	/* FIX(3.072711026) */
+
+static const short table_iquant[64] = { 3,  5,  7,  9, 11, 13, 15, 17,
+					5,  7,  9, 11, 13, 15, 17, 19,
+		      			7,  9, 11, 13, 15, 17, 19, 21,
+			  		9, 11, 13, 15, 17, 19, 21, 23,
+			  		11, 13, 15, 17, 19, 21, 23, 25,
+			  		13, 15, 17, 19, 21, 23, 25, 27,
+			  		15, 17, 19, 21, 23, 25, 27, 29,
+			  		17, 19, 21, 23, 25, 27, 29, 31};
+
+
+static const int table_zigzag[64] = { 	0,  1,   8, 16,  9,  2,  3, 10,
+					17, 24, 32, 25, 18, 11,  4,  5,
+					12, 19, 26, 33, 40, 48, 41, 34,
+					27, 20, 13,  6,  7, 14, 21, 28,
+					35, 42, 49, 56, 57, 50, 43, 36,
+					29, 22, 15, 23, 30, 37, 44, 51,
+					58, 59, 52, 45, 38, 31, 39, 46,
+					53, 60, 61, 54, 47, 55, 62, 63};
+
+
+int threadVideo(void *data);
+
+typedef struct matrice_rgb
+{
+	int r;
+	int g;
+	int b;
+
+}Matrice_rgb;
+
+typedef struct block
+{
+	int nb_data;
+	short data[64];
+	short tmp[64];
+
+}Block;
+
+typedef struct macroblock
+{
+	int mbc;
+	int mbdesc;
+	int mbdiff;
+	int numofblock;
+	Block bl[NB_BLOCK];
+
+}Macroblock;
+
+typedef struct gob
+{
+	int code_start;
+	int quantificateur;
+	int numofmacroblock;
+	Macroblock macrob[NB_MCBLOCK_MAX];
+
+}Gob;
+
+class Video
+{
+	public:
+
+	Video();
+
+	void initializationCommunication();
+	void saveFrame(const char* filename,int type,bool color);
+	IplImage* getFrame(int type);
+	void mutexP();
+	void mutexV();
+	void destroyMutex();
+	bool getQuit();
+	void shutDown();
+	void disconnection();
+
+	void get_screen();
+	void dequantification(short* data);
+	void zigzag_ordering(Block* bl);
+	void toBinary( char* bin, int sizeofbuf);
+	int get_int_from_binary(char* bin, int* index, int size, int nb_bits);
+	int decode_block(Block* bl, char* bin, int size, int* index, int DC);
+	int decode_macroblock(Macroblock* mb, char* bin, int size, int* index);
+	int decode_gob(char* bin, int size, int* index, int* nb_mcblock);
+	int decode_image(char* bin, int size, int* nb_gob, int* nb_mcblock);
+	void idct(short* in);
+	void get_matrice(Matrice_rgb* ret, short* luma, short* blue, short* red, int* index);
+	void get_matrice_from_Picture(Matrice_rgb* mat, int nb_gob, int nb_mcblock);
+
+	Communication *communication;
+	int length;
+	unsigned int msg[TAILLE_MAX_VIDEO];
+
+	private:
+
+	Matrice_rgb matrice[240][320]; //RGB
+	int nb_gob;
+	int nb_mcblock;
+	
+
+	int code_start;
+	int format;
+	int resolution;
+	int type;
+	int quantificateur;
+	int numero;
+	int numofgob;
+	Gob group[NB_GOB_MAX];
+
+	SDL_mutex* mutexImage;
+	
+
+	IplImage* iplFrontImage;
+	IplImage* iplBottomImage;
+
+	bool quit;
+
+};
+
+
+#endif

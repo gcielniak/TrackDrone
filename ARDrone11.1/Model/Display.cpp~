@@ -1,0 +1,43 @@
+#include "Display.h"
+
+
+
+Display::Display(SDL_Surface* s){
+
+	ecran = s;
+}
+
+void Display::init(){
+
+	rect.x = 0;
+	rect.y = 0;
+	rect.w = 320;
+	rect.h = 240;
+	
+	//ecran = SDL_SetVideoMode(320, 240, 32, SDL_HWSURFACE | SDL_DOUBLEBUF);
+
+	SDL_Init(SDL_INIT_VIDEO);
+
+	SDL_EnableKeyRepeat(0,0);
+	SDL_EnableUNICODE(1);
+	SDL_WM_SetCaption("Window",NULL);
+	SDL_ShowCursor(SDL_DISABLE);
+
+}
+
+/*This performs a fast blit from the source surface to the destination surface*/
+void Display::blipSurface(SDL_Surface* image){
+
+	SDL_BlitSurface(image, NULL, ecran, &rect);
+
+}
+
+/*Swaps screen buffers*/
+void Display::flip(){
+
+	SDL_Flip(ecran);
+
+}
+
+
+

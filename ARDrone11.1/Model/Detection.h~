@@ -1,0 +1,48 @@
+#ifndef HEADER_DETECTION
+#define HEADER_DETECTION
+
+#include <opencv/cv.h>
+#include <opencv/highgui.h>
+#include <SDL/SDL.h>
+
+class Detection
+{
+	public:
+
+	Detection();
+	
+	void detectPeople();
+
+	void setImage(IplImage* image);
+	std::vector<cv::Rect> * getRect();
+	void on();
+	void off();
+	bool isOn();
+
+	void mutexP(int num);
+	void mutexV(int num);
+	void destroyMutex();
+
+	bool getQuit();
+	void shutDown();
+		
+	private:
+
+	//SDL_mutex* mutexImage;
+	//SDL_mutex* mutexRec;
+	IplImage* image;
+	bool quit;
+	bool detect;
+
+	//CvHaarClassifierCascade * pCascade;  // the face detector
+	//CvHaarClassifierCascade * pCascade2;
+	//CvMemStorage * pStorage;      // memory for detector to use
+	//CvSeq * pFaceRectSeq;               // memory-access interface
+
+	std::vector<cv::Rect> r;
+	cv::CascadeClassifier *c;
+};
+
+
+#endif
+

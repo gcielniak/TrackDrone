@@ -1,0 +1,69 @@
+#ifndef HEADER_NAVIGATIONDATA
+#define HEADER_NAVIGATIONDATA
+
+#include "Communication.h"
+#include <SDL/SDL.h>
+
+#define SIZE_MAX_NAVDATA	2048
+#define TIMER			200000
+
+int threadNavData(void *data);
+
+typedef struct navdata
+{
+	int header;
+	int state;
+	int seq;
+	int visio;
+	short tag;
+	short size;
+	int ctrl_state;
+	int bat;
+	float theta;
+	float phi;
+	float psi;
+	int altitude;
+	float vx;
+	float vy;
+	float vz;
+	int rest[200];
+	
+}Navdata;
+
+class NavigationData
+{
+	public:
+	
+	NavigationData();
+
+	void initializationCommunication();
+	void disconnection();
+	void update();
+	
+	int getLevelBattery();
+	int getAltitude();
+	float getPsi();
+	float getPhi();
+	float getTheta();
+	float getVx();
+	float getVy();
+	bool getQuit();
+
+	void mutexP();
+	void mutexV();
+	void destroyMutex();
+	void shutDown();
+
+	Communication *communication;
+	int length;
+	Navdata nav;
+
+	private:
+
+	SDL_mutex* mutexNavData;
+	bool quit;
+	
+};
+
+
+#endif

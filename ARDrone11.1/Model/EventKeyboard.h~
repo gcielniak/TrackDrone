@@ -1,0 +1,65 @@
+#ifndef HEADER_EVENTKEYBOARD
+#define HEADER_EVENTKEYBOARD
+
+
+#define LEFT_ROTATION	0	//	Keyboard : a		Xbox Controller : Joystick 2 (position left)   
+#define RIGHT_ROTATION	1	//	Keyboard : d		Xbox Controller : Joystick 2 (position right)
+#define LAND		2	//	Keyboard : l		Xbox Controller : Button back
+#define EMERGENCY	3	//	Keyboard : r		Xbox Controller : Button Xbox
+#define GO_DOWN		4	//	Keyboard : s		Xbox Controller : Joystick 2 (position down)
+#define TAKE_OFF	5	//	Keyboard : t		Xbox Controller : Button start
+#define GO_UP		6	//	Keyboard : w		Xbox Controller : Joystick 2 (position up)
+#define MOVE_FORWARD	7	//	Keyboard : top arrow	Xbox Controller : Joystick 1 (position up)
+#define MOVE_BACK	8	//	Keyboard : down arrow	Xbox Controller : Joystick 1 (position down)
+#define MOVE_RIGHT	9	//	Keyboard : rigth arrow	Xbox Controller : Joystick 1 (position right)
+#define MOVE_LEFT	10	//	Keyboard : left arrow	Xbox Controller : Joystick 1 (position left)
+#define START_RECORD	11	//	Keyboard : m		Xbox Controller : Button A
+#define STOP_RECORD	12	//	Keyboard : n		Xbox Controller : Button B
+#define QUIT		13	//	Keyboard : escape	Xbox Controller : Button Y
+#define CAM1		14	//	Keyboard : 1		Xbox Controller : Hat (position up)
+#define CAM2		15	//	Keyboard : 2		Xbox Controller : Hat (position right)
+#define CAM3		16	//	Keyboard : 3		Xbox Controller : Hat (position down)
+#define CAM4		17	//	Keyboard : 4		Xbox Controller : Hat (position left)
+//#define AUTO_CONTROL	18	//	Keyboard : none		Xbox Controller : Button X
+#define NEXT_OBJECT	19	//	Keyboard : none		Xbox Controller : Trigger RT
+#define PREVIOUS_OBJECT 20	//	Keyboard : none		Xbox Controller : Trigger LT
+#define LOCK		21	//	Keyboard : none		Xbox Controller : Button RB
+#define MANUAL_CONTROL	22	//	Keyboard : none		Xbox Controller : any button,Joystick...
+
+#include <SDL/SDL.h>
+
+class EventKeyboard
+{
+	public:
+
+	EventKeyboard();
+	void updateEvent();
+	
+	void mutexP();
+	void mutexV();
+	void destroyMutex();
+	bool getKey(int i);
+	void setKey(bool val,int i);
+
+	bool getQuit();
+	void shutDown();
+
+	SDL_Surface* getSDLSurface();
+	
+	private:
+
+	bool key[23];
+	bool quit();
+	
+	SDL_mutex* mutexKeyData;
+	SDL_Event event;
+	SDL_Surface* ecran;
+	SDL_Joystick *joystick; // attention, c'est bien un pointeur !
+
+
+
+};
+
+
+#endif
+

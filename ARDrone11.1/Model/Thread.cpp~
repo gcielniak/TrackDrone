@@ -1,0 +1,110 @@
+#include "Thread.h"
+
+int threadEventKeyboard(void *data){
+
+	int i=0;
+	EventKeyboard* eventKeyboard = (EventKeyboard*)data;
+	
+	eventKeyboard->updateEvent();	
+
+	printf("END THREAD EVTKEYBOARD\n");
+
+	return 0;
+}
+
+
+int threadCommand(void *data){
+
+	Command* command = (Command*)data;
+
+	//command->initializationCommunication();
+	//command->initializationDrone();
+
+	while(!command->getQuit()){
+
+		if(!command->isPriorityCommand() && !command->isOnGround()){
+
+			command->mutexP();
+			command->movement();
+			command->mutexV();
+		}
+	
+	SDL_Delay(DELAY_COMMAND);
+	}
+
+	printf("END THREAD CMD\n");	
+	
+	return 0;
+}
+
+int threadWatchdog(void *data){
+
+	Command* command = (Command*)data;
+
+	while(!command->getQuit()){
+
+		if(command->isConnected()){
+
+			command->mutexP();	
+			//commande->watchdog();
+			command->mutexV();
+			command->setPriorityCommand(true);
+			SDL_Delay(1000); //1 seconde
+		}
+	}
+
+	printf("END THREAD WATCHDOG\n");	
+	
+	return 0;
+}
+
+
+
+int threadVideo(void *data){
+
+	Video* video = (Video*)data;
+
+	//video->initializationCommunication();
+	//video->communication->wakeUpPort();
+
+	while(!video->getQuit())
+	{
+		/*video->communication->selectReceiveData((void*)video->msg, &video->length, (TAILLE_MAX_VIDEO*4)-4, TIMER);
+		
+		if( video->length < 1 )
+		video->communication->wakeUpPort();
+		else
+		video->get_screen();
+		*/
+	}
+	
+
+	printf("END THREAD VIDEO\n");
+
+	return 0;
+}
+
+int threadNavData(void *data){
+
+	NavigationData* navigationData = (NavigationData*)data;
+
+//	navigationData->initializationCommunication();
+	
+	//navigationData->communication->wakeUpPort();
+
+	while(!navigationData->getQuit())
+	{
+		/*navigationData->communication->selectReceiveData(&navigationData->nav, &navigationData->length, SIZE_MAX_NAVDATA, TIMER);
+		
+		if( navigationData->length < 1 )
+		navigationData->communication->wakeUpPort();
+		else
+		navigationData->update();
+		*/
+	}
+	
+	printf("END THREAD NAV DATA\n");
+
+	return 0;
+}
+

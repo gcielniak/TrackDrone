@@ -1,0 +1,99 @@
+#ifndef HEADER_COMMANDE
+#define HEADER_COMMANDE
+
+
+#include <SDL/SDL.h>
+
+#define AT_PORT				5556
+#define SIZE_MSG		1024
+#define DELAY_COMMAND			15
+
+#include "Connection.h"
+
+class Commande
+{
+	public:
+
+	Commande();
+
+	void turnOnUpdateEvent();
+	void emergency();
+	void land();
+	void takeOff();
+	void movement();
+	void watchdog();
+	void initializationConnection();
+	void disconnection();
+	void initializationDrone();
+	
+	bool isOnGround();
+
+
+	/*Accessor*/
+	float getAltitude();
+	float getPitch();
+	float getYaw();
+	float getRoll();
+
+	char* getMsg();
+	int getSeq();
+	
+	//EventKeyboard * getEventKeyboard();
+	//Connection* getConnection();
+
+
+	void setAltitude(float altitude);
+	void setPitch(float pitch);
+	void setYaw(float yaw);
+	void setRoll(float roll);
+	void setMsg(char* msg);
+	void setOnGround(bool onGround);
+	
+
+	void mutexP();
+	void mutexV();
+	void destroyMutex();
+	void setKey(bool val,int i);
+	bool getKey(int i);
+
+	void setPriorityCommand(bool priorityCommand);
+	bool isPriorityCommand();
+
+	void changeCam(int cam);
+	
+	bool isConnected();
+
+	bool getQuit();
+	void shutDown();
+
+
+
+	private:
+	bool quit;
+	bool connected;
+
+
+	bool priorityCommand;
+	
+	
+	SDL_mutex* mutexArg;
+	Connection *connection;
+	
+
+	unsigned int seq;	// Current sequence number
+
+
+	float altitude;
+	float pitch;
+	float yaw;
+	float roll;
+	bool onGround;	
+	char msg[SIZE_MSG];
+
+	
+
+
+};
+
+
+#endif

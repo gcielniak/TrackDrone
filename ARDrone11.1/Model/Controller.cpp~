@@ -1,0 +1,96 @@
+#include "Controller.h"
+
+Controller::Controller()
+{
+	commande = new Commande();
+
+
+	video = new Video();
+
+	eventKeyboard = new EventKeyboard();
+
+	display = new Display(eventKeyboard->getSDLSurface());
+
+}	
+
+
+void Controller::run(){
+
+
+	display->init();
+
+
+	SDL_Thread* threadCmd = SDL_CreateThread(threadCommande,commande);
+	
+	SDL_Thread* threadEK = SDL_CreateThread(threadEventKeyboard,eventKeyboard);
+
+
+
+
+	//SDL_Surface* surfaceImage = video->image->getSdlSurfaceImage();
+	
+	SDL_Thread* threadVd = SDL_CreateThread(threadVideo,video);
+	
+
+
+
+	//display->init();
+	
+
+	while(1)
+	{
+	//printf("whl run\n");
+		Controller::updateKey();
+		Controller::sendArg();
+
+		if(key[12]==true)
+			video->saveImage("image.jpg");	//png
+		
+			
+
+
+		display->blipSurface(video->getSdlSurfaceImage());
+		display->flip();
+
+	}
+
+
+}
+
+
+void Controller::launchKeyboardLoop(){
+
+	eventKeyboard->updateEvent();
+
+}
+
+void Controller::updateKey(){
+
+	//printf("UPDT KEY AVT\n");
+	int i;
+	eventKeyboard->mutexP();
+	//printf("MILIEU\n");	
+	for(i=0;i<13;i++)
+		key[i]=eventKeyboard->getKey(i);
+	eventKeyboard->mutexV();
+
+
+	//printf("UPDT KEY APRS\n");
+
+}
+
+void Controller::sendArg(){
+
+	//printf("SEND ARG AVT\n");
+	//eventKeyboard->mutexP();
+	
+	commande->mutexP();
+	//printf("SEND ARG MLIEU\n");
+	int i;
+	for(i=0;i<13;i++)
+		commande->setKey(key[i],i);
+
+	commande->mutexV();
+	//eventKeyboard->mutexV();
+	//printf("SND ARG APRS\n");
+}

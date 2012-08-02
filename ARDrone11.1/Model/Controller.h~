@@ -1,0 +1,40 @@
+#ifndef HEADER_CONTROLLER
+#define HEADER_CONTROLLER
+
+#include "Commande.h"
+#include "Thread.h"
+#include "Video.h"
+#include "EventKeyboard.h"
+#include "Display.h"
+#include "Thread.h"
+
+
+class Controller
+{
+	public:
+
+	Controller();
+
+	void run();
+	void launchKeyboardLoop();
+	void updateKey();
+	void sendArg();
+
+
+
+	private:
+
+	EventKeyboard *eventKeyboard;
+	Commande *commande;
+	Video *video;
+	Display *display;
+
+	bool key[11];
+
+
+
+
+};
+
+
+#endif

@@ -1,0 +1,22 @@
+#include "../Model/Commande.h"
+#include "../Model/Video.h"
+#include "../Model/NavigationData.h"
+//#include "../Model/Detection.h"
+
+//#include "../View/Display.h"
+#include "../View/EventKeyboard.h"
+
+
+int threadEventKeyboard(void *data);
+
+int threadCommande(void* data);
+
+int threadWatchdog(void* data);
+
+int threadVideo(void* data);
+
+int threadNavData(void *data);
+
+int threadDisplay(void *data);
+
+int threadDetection(void *data);

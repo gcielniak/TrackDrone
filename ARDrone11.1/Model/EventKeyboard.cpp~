@@ -1,0 +1,430 @@
+
+#include "EventKeyboard.h"
+
+EventKeyboard::EventKeyboard()
+{	
+	mutexKeyData= SDL_CreateMutex();
+
+	SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK);
+
+	
+	ecran = SDL_SetVideoMode(320, 240, 32, SDL_HWSURFACE | SDL_DOUBLEBUF);
+	SDL_FreeSurface(ecran);
+
+		
+	int i;
+	for(i=0;i<23;i++)
+		key[i]=false;
+
+	key[MANUAL_CONTROL]=true;
+
+	printf("Il y a %d joysticks\n",SDL_NumJoysticks());
+	printf("joysticks numero 0 -> %s\n",SDL_JoystickName(0));
+
+	
+	joystick = SDL_JoystickOpen(0); // prend en paramètre le numéro du joystick, ici 0
+
+	printf("Il y a %d buttons\n",SDL_JoystickNumButtons(joystick));
+	printf("Il y a %d axes\n",SDL_JoystickNumAxes(joystick));
+	printf("Il y a %d chapeaux\n",SDL_JoystickNumHats(joystick));
+	printf("Il y a %d trackball\n",SDL_JoystickNumBalls(joystick));
+
+	SDL_JoystickEventState(SDL_ENABLE);
+}
+
+bool EventKeyboard::getKey(int i){
+
+	return key[i];
+}
+
+void EventKeyboard::setKey(bool val,int i){
+
+	key[i]=val;
+}
+
+void EventKeyboard::mutexP(){
+
+	SDL_mutexP(mutexKeyData);
+
+}
+
+
+void EventKeyboard::mutexV(){
+
+	SDL_mutexV(mutexKeyData);
+
+}
+
+void EventKeyboard::destroyMutex(){
+
+	SDL_DestroyMutex(mutexKeyData);
+
+}
+
+SDL_Surface* EventKeyboard::getSDLSurface(){return ecran;}
+
+
+void EventKeyboard::updateEvent(){
+
+	int i;
+
+	bool RT=false;
+	bool LT=false;
+	
+	while(!quit){
+		//printf("while update event\n");
+
+
+		
+		mutexP();
+
+		while(SDL_PollEvent(&event))
+		{
+			
+
+			if (event.type==SDL_JOYBUTTONDOWN){
+				key[MANUAL_CONTROL] = true;
+				switch(event.jbutton.button){
+						case 0:
+							key[START_RECORD] = true;
+							break;
+						case 1:
+							key[STOP_RECORD] = true;
+							break;
+						case 2:
+							printf("2\n");
+							//key[AUTO_CONTROL] = true;
+							break;
+						case 3:
+							key[QUIT] = true;
+							break;
+						case 4:
+							printf("4\n");
+							break;
+						case 5:
+							printf("5\n");
+							break;
+						case 6:
+							key[LAND] = true;
+							break;
+						case 7:
+							key[TAKE_OFF] = true;
+							break;
+						case 8:
+							key[EMERGENCY] = true;
+							break;
+						case 9:
+							printf("9\n");
+							break;
+						case 10:
+							printf("10\n");
+							break;
+
+						default:
+							break;
+				}
+			}
+
+			if (event.type==SDL_JOYBUTTONUP){
+				key[MANUAL_CONTROL] = true;
+				switch(event.jbutton.button){
+						case 0:
+							key[START_RECORD] = false;
+							break;
+						case 1:
+							key[STOP_RECORD] = false;
+							break;
+						case 2:
+							printf("2\n");
+							//key[AUTO_CONTROL] = false;
+							break;
+						case 3:
+							printf("3\n");
+							break;
+						case 4:
+							printf("4\n");
+							break;
+						case 5:
+							key[LOCK] = true;
+							key[MANUAL_CONTROL] = false;
+							break;
+						case 6:
+							key[LAND] = false;
+							break;
+						case 7:
+							key[TAKE_OFF] = false;
+							break;
+						case 8:
+							key[EMERGENCY] = false;
+							break;
+						case 9:
+							printf("9\n");
+							break;
+						case 10:
+							printf("10\n");
+							break;
+
+						default:
+							break;
+				}
+			}
+
+			if (event.type==SDL_JOYAXISMOTION){
+				key[MANUAL_CONTROL] = true;
+				switch(event.jaxis.axis){
+						case 0:
+							if(event.jaxis.value < -2000)
+								key[MOVE_LEFT] = true;
+							else if(event.jaxis.value > 2000)
+								key[MOVE_RIGHT] = true;
+							else{	key[MOVE_LEFT] = false;
+								key[MOVE_RIGHT] = false;
+							    }
+
+							break;
+						case 1:
+							if(event.jaxis.value > 2000)
+								key[MOVE_BACK] = true;
+							else if(event.jaxis.value < -2000)
+								key[MOVE_FORWARD] = true;
+							else{	key[MOVE_BACK] = false;
+								key[MOVE_FORWARD] = false;
+							    }
+							break;
+						case 2:
+							
+							if(event.jaxis.value == 32767){
+								//printf("PRESSED\n");
+								key[PREVIOUS_OBJECT] = true;
+							}
+							else if(event.jaxis.value == -32768){
+								//printf("RELESED\n");
+								key[PREVIOUS_OBJECT] = false;
+
+							}
+							else{	//printf("DEfault\n");
+								key[PREVIOUS_OBJECT] = false;
+							}
+							break;
+						case 3:
+							if(event.jaxis.value < -2000)
+								key[LEFT_ROTATION] = true;
+							else if(event.jaxis.value > 2000)
+								key[RIGHT_ROTATION] = true;
+							else{	key[LEFT_ROTATION] = false;
+								key[RIGHT_ROTATION] = false;
+							    }
+
+							break;
+						case 4:
+							if(event.jaxis.value < -2000)
+								key[GO_UP] = true;
+							else if(event.jaxis.value > 2000)
+								key[GO_DOWN] = true;
+							else{	key[GO_UP] = false;
+								key[GO_DOWN] = false;
+							    }
+
+							break;
+						case 5:
+							
+							if(event.jaxis.value == 32767){
+								//printf("PRESSED\n");
+								key[NEXT_OBJECT] = true;
+							}
+							else if(event.jaxis.value == -32768){
+								//printf("RELESED\n");
+								key[NEXT_OBJECT] = false;
+
+							}
+							else{	//printf("DEfault\n");
+								key[NEXT_OBJECT] = false;
+							}
+							break;
+						case 6:
+							printf("6\n");
+							break;
+
+						default:
+							break;
+				}
+
+
+
+			}
+
+			if (event.type==SDL_JOYHATMOTION){
+				key[MANUAL_CONTROL] = true;
+				if(event.jhat.hat==0){
+					switch(event.jhat.value){
+						case SDL_HAT_UP:
+							key[CAM1] = true;
+							break;
+						case SDL_HAT_DOWN:
+							key[CAM2] = true;
+							break;
+						case SDL_HAT_RIGHT:
+							key[CAM3] = true;
+							break;
+						case SDL_HAT_LEFT:
+							key[CAM4] = true;
+							break;
+						case SDL_HAT_CENTERED:
+							key[CAM1] = false;
+							key[CAM2] = false;
+							key[CAM3] = false;
+							key[CAM4] = false;
+							break;
+
+						default:
+							break;
+					}
+				}
+			}
+
+
+
+			//printf("while event appuie\n");
+			if (event.type==SDL_KEYDOWN)
+			{
+					//printf("espace\n");
+					key[MANUAL_CONTROL] = true;
+					switch(event.key.keysym.sym){
+						case SDLK_LEFT:
+							key[MOVE_LEFT] = true;
+							//printf("Aventkeyboard\n");
+							break;
+						case SDLK_RIGHT:
+							key[MOVE_RIGHT] = true;
+							break;
+						case SDLK_UP:
+							key[MOVE_FORWARD] = true;
+							break;
+						case SDLK_DOWN:
+							key[MOVE_BACK] = true;
+							break;
+						case SDLK_a:
+							key[LEFT_ROTATION] = true;
+							break;
+						case SDLK_d:
+							key[RIGHT_ROTATION] = true;
+							break;
+						case SDLK_l:
+							key[LAND] = true;
+							break;
+						case SDLK_r:
+							key[EMERGENCY] = true;
+							break;
+						case SDLK_s:
+							key[GO_DOWN] = true;
+							break;
+						case SDLK_t:
+							key[TAKE_OFF] = true;
+							break;
+						case SDLK_w:
+							key[GO_UP] = true;
+							break;
+						case SDLK_m:
+							key[START_RECORD] = true;
+							break;
+						case SDLK_n:
+							key[STOP_RECORD] = true;
+							break;
+						case SDLK_1:
+							key[CAM1] = true;
+							break;
+						case SDLK_2:
+							key[CAM2] = true;
+							break;
+						case SDLK_3:
+							key[CAM3] = true;
+							break;
+						case SDLK_4:
+							key[CAM4] = true;
+							break;
+						case SDLK_ESCAPE:
+							key[QUIT] = true;
+							break;
+			
+						default:
+							break;
+					}
+				}
+				else if (event.type==SDL_KEYUP){
+					key[MANUAL_CONTROL] = true;
+					switch(event.key.keysym.sym){
+						case SDLK_LEFT:
+							key[MOVE_LEFT] = false;
+							break;
+						case SDLK_RIGHT:
+							key[MOVE_RIGHT] = false;
+							break;
+						case SDLK_UP:
+							key[MOVE_FORWARD] = false;
+							break;
+						case SDLK_DOWN:
+							key[MOVE_BACK] = false;
+							break;
+						case SDLK_a:
+							key[LEFT_ROTATION] = false;
+							break;
+						case SDLK_d:
+							key[RIGHT_ROTATION] = false;
+							break;
+						case SDLK_l:
+							key[LAND] = false;
+							break;
+						case SDLK_r:
+							key[EMERGENCY] = false;
+							break;
+						case SDLK_s:
+							key[GO_DOWN] = false;
+							break;
+						case SDLK_t:
+							key[TAKE_OFF] = false;
+							break;
+						case SDLK_w:
+							key[GO_UP] = false;
+							break;
+						case SDLK_m:
+							key[START_RECORD] = false;
+							break;
+						case SDLK_n:
+							key[STOP_RECORD] = false;
+							break;
+						case SDLK_1:
+							key[CAM1] = false;
+							break;
+						case SDLK_2:
+							key[CAM2] = false;
+							break;
+						case SDLK_3:
+							key[CAM3] = false;
+							break;
+						case SDLK_4:
+							key[CAM4] = false;
+							break;
+			
+						default:
+							break;
+					}
+				
+
+				}
+			}	
+		mutexV();
+	
+	}
+
+	SDL_JoystickClose(joystick);
+	//SDL_FreeSurface(ecran);
+	//SDL_Quit();
+}
+
+bool EventKeyboard::getQuit(){return quit;}
+
+void EventKeyboard::shutDown(){
+	
+
+	quit=true;
+}
